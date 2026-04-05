@@ -414,8 +414,19 @@ def run_association_rules():
     ch = [c for c in df.columns if c.startswith("Q10_challenges__")]
     ft = [c for c in df.columns if c.startswith("Q14_preferred_features__")]
     basket = df[ch+ft].fillna(0).astype(bool)
-    freq  = apriori(basket, min_support=0.08, use_colnames=True)
-    rules = association_rules(freq, metric="lift", min_threshold=1.1)
+    freq = apriori(basket, min_support=0.08, use_colnames=True)
+    # Handle both old mlxtend (<0.21) and new mlxtend (>=0.21) API
+    try:
+        # New API (mlxtend >= 0.21): num_itemsets parameter required
+        rules = association_rules(freq, metric="lift", min_threshold=1.1, num_itemsets=len(freq))
+    except TypeError:
+        try:
+            # Alternative new API call
+            rules = association_rules(freq, num_itemsets=len(freq))
+            rules = rules[rules["lift"] >= 1.1]
+        except TypeError:
+            # Old API (mlxtend < 0.21)
+            rules = association_rules(freq, metric="lift", min_threshold=1.1)
     rules = rules[
         rules["antecedents"].apply(lambda x: any("challenge" in i for i in x)) &
         rules["consequents"].apply(lambda x: any("feature" in i for i in x))
@@ -601,24 +612,25 @@ def _dark_table(df_tbl, h=None):
                       margin=dict(l=0, r=0, t=0, b=0), font=dict(color=TEXT))
     st.plotly_chart(fig, use_container_width=True, config=PCFG)
 
-def _dark_pie(labels, values, colors, h=280, hole=0.45, title_text=None, center_text=None):
+def _dark_pie(labels, values, colors, h=320, hole=0.45, title_text=None, center_text=None):
     """Render a Plotly donut with outside labels for dark theme readability."""
     fig = go.Figure(go.Pie(
         labels=labels, values=values,
         hole=hole, marker_colors=colors,
         textinfo="label+percent",
         textposition="outside",
-        textfont=dict(size=11, color=TEXT),
-        outsidetextfont=dict(color=TEXT, size=11),
+        textfont=dict(size=10, color=TEXT),
+        outsidetextfont=dict(color=TEXT, size=10),
         insidetextfont=dict(color=TEXT_BRIGHT, size=10),
     ))
     layout_kw = dict(
-        height=h, margin=dict(t=30, b=20, l=20, r=20),
+        height=h, margin=dict(t=40, b=60, l=40, r=40),
         paper_bgcolor="rgba(0,0,0,0)", showlegend=False,
         font=dict(color=TEXT),
     )
     if title_text:
         layout_kw["title"] = dict(text=title_text, font=dict(color=TEXT_BRIGHT, size=13))
+        layout_kw["margin"]["t"] = 50
     if center_text:
         layout_kw["annotations"] = [dict(
             text=center_text, x=0.5, y=0.5, showarrow=False,
@@ -1022,7 +1034,7 @@ elif page == "\U0001f436  Dog Owner Insights":
 
         with c2:
             cc2 = raw["Q2_city_tier"].value_counts()
-            _dark_pie(cc2.index.tolist(), cc2.values.tolist(), CHART, h=280)
+            _dark_pie(cc2.index.tolist(), cc2.values.tolist(), CHART)
             ibox("45% of respondents are from metro cities, but Tier-2 accounts for 30% \u2014 "
                  "a large enough segment to justify city-specific features from day one.")
 
@@ -1141,7 +1153,7 @@ elif page == "\U0001f436  Dog Owner Insights":
 
         shead("Where Does the Money Go?")
         cat_c = raw["Q8_top_spend_category"].value_counts()
-        _dark_pie(cat_c.index.tolist(), cat_c.values.tolist(), CHART, h=300, hole=0.4)
+        _dark_pie(cat_c.index.tolist(), cat_c.values.tolist(), CHART, h=340, hole=0.4)
         ibox("Food & treats consume the largest share of dog spending (38%), followed by vet & medicines (25%). "
              "PawIndia's marketplace feature \u2014 letting owners buy food and vet services in-app \u2014 "
              "targets the two biggest spending categories directly.")
@@ -1179,7 +1191,7 @@ elif page == "\U0001f436  Dog Owner Insights":
         with c1:
             shead("How People Find Vets Today")
             vc = raw["Q11_vet_discovery"].value_counts()
-            _dark_pie(vc.index.tolist(), vc.values.tolist(), CHART, h=280, hole=0.45)
+            _dark_pie(vc.index.tolist(), vc.values.tolist(), CHART, hole=0.45)
             ibox("Word of mouth (35%) and Google Maps (30%) are the current ways people find vets. "
                  "There is no dedicated pet app in this discovery chain \u2014 "
                  "PawIndia's vet directory enters a market with no direct competitor.")
@@ -1230,7 +1242,7 @@ elif page == "\U0001f436  Dog Owner Insights":
 
         with c2:
             pc2 = raw["Q16_purchase_platform"].value_counts()
-            _dark_pie(pc2.index.tolist(), pc2.values.tolist(), CHART, h=260, hole=0.4,
+            _dark_pie(pc2.index.tolist(), pc2.values.tolist(), CHART, h=320, hole=0.4,
                       title_text="Where They Buy Pet Products")
             ibox("E-commerce platforms dominate pet product purchases \u2014 "
                  "integrating an in-app marketplace with major platforms would meet owners where they already shop.")
@@ -1365,7 +1377,7 @@ elif page == "\U0001f4b0  Will They Buy?":
         c1, c2 = st.columns(2)
         with c1:
             sub_c = raw["Q18_subscription_pref"].value_counts()
-            _dark_pie(sub_c.index.tolist(), sub_c.values.tolist(), CHART, h=300, hole=0.45)
+            _dark_pie(sub_c.index.tolist(), sub_c.values.tolist(), CHART, h=340, hole=0.45)
             ibox("Freemium is the most popular preference by far \u2014 most users want to try before paying. "
                  "This is normal for new apps in India and should be embraced, not fought.")
 
@@ -1398,7 +1410,7 @@ elif page == "\U0001f4b0  Will They Buy?":
         loc_c = raw["Q17_location_sharing"].value_counts()
         pct_share = round((loc_c.get("Yes, always",0) + loc_c.get("Yes, only when using the app",0)) / n * 100, 1)
         _dark_pie(loc_c.index.tolist(), loc_c.values.tolist(),
-                  [AMBER, HONEY, TERRA, BROWN], h=280, hole=0.5,
+                  [AMBER, HONEY, TERRA, BROWN], h=340, hole=0.5,
                   center_text="<b>{}%</b><br>Share".format(pct_share))
         ibox("{}% of respondents will share their location with the app \u2014 "
              "enough to make the nearby vet, park and groomer features fully functional from launch.".format(pct_share))
@@ -2069,6 +2081,8 @@ elif page == "\U0001f4ca  Research & Analytics":
         dhead("Feature Coefficients \u2014 What Drives Spend According to Each Model")
         if coefs:
             coef_df  = pd.DataFrame(coefs)
+            # Remove Q7_monthly_spend_inr — it is the target variable, not a predictor
+            coef_df = coef_df.drop(index=[i for i in coef_df.index if "Q7_monthly_spend" in i], errors="ignore")
             top_feat = coef_df.abs().mean(axis=1).sort_values(ascending=False).head(12).index
             coef_top = coef_df.loc[top_feat].copy()
             coef_top.index = [i.replace("_enc","").replace("_"," ")[:28] for i in coef_top.index]
