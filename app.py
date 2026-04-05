@@ -409,24 +409,26 @@ def run_clustering():
 
 @st.cache_data
 def run_association_rules():
+    import inspect
     from mlxtend.frequent_patterns import apriori, association_rules
     _, df = load_data()
     ch = [c for c in df.columns if c.startswith("Q10_challenges__")]
     ft = [c for c in df.columns if c.startswith("Q14_preferred_features__")]
     basket = df[ch+ft].fillna(0).astype(bool)
     freq = apriori(basket, min_support=0.08, use_colnames=True)
-    # Handle both old mlxtend (<0.21) and new mlxtend (>=0.21) API
-    try:
-        # New API (mlxtend >= 0.21): num_itemsets parameter required
-        rules = association_rules(freq, metric="lift", min_threshold=1.1, num_itemsets=len(freq))
-    except TypeError:
-        try:
-            # Alternative new API call
-            rules = association_rules(freq, num_itemsets=len(freq))
-            rules = rules[rules["lift"] >= 1.1]
-        except TypeError:
-            # Old API (mlxtend < 0.21)
-            rules = association_rules(freq, metric="lift", min_threshold=1.1)
+
+    # Detect mlxtend version by inspecting the function signature
+    sig = inspect.signature(association_rules)
+    params = list(sig.parameters.keys())
+
+    if "num_itemsets" in params:
+        # mlxtend >= 0.21: num_itemsets is required
+        rules = association_rules(freq, metric="lift", min_threshold=1.1,
+                                  num_itemsets=len(freq))
+    else:
+        # mlxtend < 0.21: old API
+        rules = association_rules(freq, metric="lift", min_threshold=1.1)
+
     rules = rules[
         rules["antecedents"].apply(lambda x: any("challenge" in i for i in x)) &
         rules["consequents"].apply(lambda x: any("feature" in i for i in x))
@@ -1979,7 +1981,10 @@ elif page == "\U0001f4ca  Research & Analytics":
             rules_ok = len(rules) > 0
         except Exception as e:
             rules_ok = False
-            st.error("mlxtend required. Install with: pip install mlxtend. Error: {}".format(e))
+            st.error("Association rule mining failed. Error: {}".format(e))
+            st.code(str(type(e).__name__) + ": " + str(e), language="text")
+            st.info("This is usually caused by an incompatible mlxtend version. "
+                    "Try pinning mlxtend==0.23.1 in requirements.txt.")
 
         if rules_ok:
             cs2, cc2, cl2 = st.columns(3)

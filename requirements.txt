@@ -4,4 +4,4 @@ numpy
 plotly
 scikit-learn
 xgboost
-mlxtend
+mlxtend>=0.23.0
