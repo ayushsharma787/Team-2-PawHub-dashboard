@@ -30,7 +30,7 @@ The dashboard presents findings from a synthetic survey of 2,000 Indian dog owne
 ## Files in This Repository
 
 ```
-app.py                      — Complete dashboard (single file, ~1,500 lines)
+app.py                      — Complete dashboard (single file, dark theme)
 pawindia_raw_data.csv       — Synthetic raw survey data (2,020 rows, with noise)
 pawindia_cleaned_data.csv   — Cleaned and ML-ready dataset (1,966 rows, 109 columns)
 requirements.txt            — Python dependencies
@@ -61,6 +61,14 @@ The dashboard opens at `http://localhost:8501`
 
 ---
 
+## Python Version
+
+This dashboard is tested and compatible with **Python 3.8 through 3.11**. Python 3.11.8 is recommended for stability on Streamlit Cloud.
+
+All string formatting uses `.format()` instead of f-strings for maximum compatibility. No walrus operators or other 3.10+ syntax is used.
+
+---
+
 ## How to Deploy on Streamlit Cloud (Free)
 
 1. Push all files to a **public GitHub repository**
@@ -68,6 +76,7 @@ The dashboard opens at `http://localhost:8501`
 3. Click **New App**
 4. Select your repository, set branch to `main`, set **Main file path** to `app.py`
 5. Click **Deploy** — Streamlit Cloud installs `requirements.txt` automatically
+6. Optionally set the Python version to `3.11` in Streamlit Cloud's Advanced settings
 
 The app should be live within 2 to 3 minutes.
 
@@ -125,7 +134,7 @@ Apriori algorithm on Q10 (challenges) and Q14 (preferred features). Rules show w
 
 ### Regression — Predicting Monthly Spend
 
-Linear, Ridge (L2), and Lasso (L1) regression on Q7 (monthly dog spend). Evaluated on R2, RMSE, and MAE with 5-fold cross-validation.
+Linear, Ridge (L2), and Lasso (L1) regression on Q7 (monthly dog spend). Evaluated on R², RMSE, and MAE with 5-fold cross-validation.
 
 ---
 
@@ -148,11 +157,23 @@ This project follows a **CRISP-DM** structure overlaid with a **Lean Startup Val
 
 | Element | Value |
 |---|---|
-| Primary colour | Coffee Brown `#6F4E37` |
-| Accent colour | Amber `#D4860B` |
-| Background | Cream `#FFFCF8` |
-| Text | Chocolate `#2C1810` |
+| Primary accent | Amber `#D4A853` |
+| Secondary accent | Honey `#E8C36A` |
+| Background | Deep brown `#0D0A06` |
+| Surface | Warm dark `#1A1209` |
+| Body text | Cream `#EDE4D3` |
 | Font | Plus Jakarta Sans |
+
+---
+
+## Design & Accessibility Notes
+
+- Full dark theme with WCAG AA compliant contrast ratios across all text and UI elements
+- Pie chart labels rendered outside slices to avoid dark-on-dark readability issues
+- Heatmap cell text uses bright cream for readability on both light and dark cells
+- Sidebar navigation text meets 4.5:1 contrast minimum
+- Simulated place data is clearly marked with a distinct warning callout (red border) to prevent confusion with real data
+- Adaptive column layouts — place cards adjust column count to match result count
 
 ---
 
