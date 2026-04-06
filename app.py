@@ -130,7 +130,26 @@ html, body, [class*="css"] {
 .stApp { background: #0D0A06 !important; }
 .main .block-container { background: #0D0A06 !important; }
 .block-container { padding-top: 1.2rem; padding-bottom: 2rem; max-width: 1400px; }
+stApp::before, .stApp::after {
+  content: "";
+  position: fixed;
+  width: 460px;
+  height: 460px;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatGlow 14s ease-in-out infinite;
+}
+.stApp::before { top: -140px; right: -120px; background: #D4A853; }
+.stApp::after  { bottom: -170px; left: -100px; background: #B89ED6; animation-delay: -5s; }
+.main .block-container { position: relative; z-index: 1; }
 
+@keyframes floatGlow {
+  0%,100% { transform: translateY(0) translateX(0) scale(1); }
+  50%     { transform: translateY(-18px) translateX(14px) scale(1.08); }
+}
 /* ── Force all Streamlit text to cream on dark ── */
 .stMarkdown p, .stMarkdown li, .stMarkdown span,
 [data-testid="stText"], label, .stSelectbox label,
@@ -614,6 +633,9 @@ def run_regression():
     from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
     X, y3, feat_names = build_features()
     _, df = load_data()
+    leakage_features = {"Q7_monthly_spend_inr", "spend_per_dog"}
+    feat_names = [f for f in feat_names if f not in leakage_features]
+    X = X[feat_names].copy()
     y = df["Q7_monthly_spend_inr"].fillna(df["Q7_monthly_spend_inr"].median()).iloc[:len(X)]
     Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=42)
     sc = StandardScaler()
@@ -1406,7 +1428,7 @@ elif page == "\U0001f436  Dog Owner Insights":
             "Vaccination tracking \u2014 the third biggest problem \u2014 is easy to solve digitally and creates daily app engagement.",
         ])
 
-    with t4:
+    with t3:
         shead("How Dog Owners Use Apps and the Internet")
         c1, c2 = st.columns(2)
         with c1:
@@ -1660,7 +1682,7 @@ elif page == "\U0001f4b0  Will They Buy?":
             "Rural users show the lowest intent and spend \u2014 defer to a later growth phase.",
         ])
 
-    with t4:
+    with t3:
         shead("Who Is Most Likely to Download PawIndia?")
         c1, c2 = st.columns(2)
         with c1:
@@ -1948,7 +1970,7 @@ elif page == "\U0001f4ca  Research & Analytics":
         '<div><h1 class="shimmer-title" style="margin:0;font-size:1.7rem;font-family:Bricolage Grotesque,sans-serif;'
         'font-weight:800">Research & Analytics</h1>'
         '<div style="color:{dim};font-size:.88rem;margin-top:4px">'
-        'Full ML analysis: Classification \u00b7 Clustering \u00b7 Association Rules \u00b7 Regression'
+        'Full ML analysis: Classification \u00b7 Clustering \u00b7 Regression'
         '</div></div></div></div>'.format(bg=SURFACE, bd=BORDER, a=AMBER, txt=TEXT_BRIGHT, dim=TEXT_DIM),
         unsafe_allow_html=True)
 
@@ -1974,7 +1996,7 @@ elif page == "\U0001f4ca  Research & Analytics":
             '<div class="ibox" style="margin-bottom:30px"><span class="anim-pulse">\U0001f4a1</span> {}</div>'.format(t), unsafe_allow_html=True)
 
     t1, t2, t3, t4 = st.tabs(["\U0001f3af Classification","\U0001f535 Clustering",
-                               "\U0001f517 Association Rules","\U0001f4c8 Regression"])
+                            "\U0001f4c8 Regression"])
 
     # ── Classification ────────────────────────────────────────────────────────
     with t1:
@@ -2177,71 +2199,7 @@ elif page == "\U0001f4ca  Research & Analytics":
             "K=4 is statistically supported by both elbow and silhouette analysis.",
         ])
 
-    # ── Association Rules ─────────────────────────────────────────────────────
-    with t3:
-        dhead("Association Rule Mining \u2014 Which Problems Drive Demand for Which Features?")
-        st.markdown("<p style='color:{}'>Apriori algorithm. Min support: 8%, Min lift: 1.1. "
-                    "Rules read as: if a dog owner faces X, they are significantly more likely to want Y.</p>".format(TEXT_DIM),
-                    unsafe_allow_html=True)
-        try:
-            with st.spinner("Mining rules\u2026"):
-                rules = run_association_rules()
-            rules_ok = len(rules) > 0
-        except Exception as e:
-            rules_ok = False
-            st.error("Association rule mining failed. Error: {}".format(e))
-            st.code(str(type(e).__name__) + ": " + str(e), language="text")
-            st.info("This is usually caused by an incompatible mlxtend version. "
-                    "Try pinning mlxtend==0.23.1 in requirements.txt.")
-
-        if rules_ok:
-            cs2, cc2, cl2 = st.columns(3)
-            with cs2: min_sup  = st.slider("Min Support",   0.05, 0.30, 0.08, 0.01)
-            with cc2: min_conf = st.slider("Min Confidence",0.1,  0.9,  0.20, 0.05)
-            with cl2: min_lift = st.slider("Min Lift",      1.0,  3.0,  1.10, 0.05)
-
-            filtered_r = rules[
-                (rules["support"] >= min_sup) &
-                (rules["confidence"] >= min_conf) &
-                (rules["lift"] >= min_lift)
-            ]
-            st.markdown("<p style='color:{}'>{} rules match current filters.</p>".format(TEXT_DIM, len(filtered_r)),
-                        unsafe_allow_html=True)
-
-            dhead("Top Rules: Dog Owner Problem \u2192 Feature They Want")
-            disp_r = filtered_r[["antecedents_str","consequents_str","support","confidence","lift"]].head(20)
-            disp_r.columns = ["Problem (Antecedent)","Feature Wanted (Consequent)","Support","Confidence","Lift"]
-            _dark_table(disp_r)
-
-            if len(filtered_r) > 0:
-                dhead("Support vs Confidence \u2014 Bubble Size = Lift")
-                fig_bub = px.scatter(
-                    filtered_r.head(25),
-                    x="support", y="confidence", size="lift",
-                    color="lift",
-                    hover_data=["antecedents_str","consequents_str","lift"],
-                    color_continuous_scale=[[0,AMBER],[1,HONEY]],
-                    size_max=30,
-                    labels={"support":"Support","confidence":"Confidence"},
-                )
-                pc(fig_bub, h=360,
-                   margin=dict(t=20, b=20, l=70, r=20),
-                   xaxis=dict(title="Support (how common the problem is)"),
-                   yaxis=dict(title="Confidence (how strongly it predicts the feature)"))
-                dibox("Top-right bubbles are the most actionable rules \u2014 common problems that reliably "
-                      "predict a specific feature demand. Vet access problems predicting the vet directory "
-                      "and vaccination tracker are the strongest, highest-confidence rules.")
-
-            st.download_button("\u2b07 Download Rules", filtered_r.to_csv(index=False),
-                               "pawindia_rules.csv","text/csv")
-
-            tab_summary([
-                "Dog owners who struggle to find vets are significantly more likely to want the vet directory feature.",
-                "Vaccination tracking problems predict health tracker demand with high confidence.",
-                "Association rules confirm that PawIndia's top three features are the right ones \u2014 "
-                "they match the top three pain points.",
-            ])
-
+   
     # ── Regression ────────────────────────────────────────────────────────────
     with t4:
         dhead("Regression \u2014 What Predicts How Much a Dog Owner Spends?")
@@ -2255,7 +2213,7 @@ elif page == "\U0001f4ca  Research & Analytics":
         dhead("Model Comparison")
         _dark_table(reg_res, h=170)
         best_r = reg_res.sort_values("R\u00b2",ascending=False).iloc[0]["Model"]
-        dibox("Best model: {}. Ridge regularisation handles correlated one-hot features better "
+       dibox("Best model: {}. Metrics are now computed after removing target leakage (monthly spend and spend-per-dog) from predictors, so scores are realistic. Ridge regularisation handles correlated one-hot features better "
               "than plain linear regression. Lasso automatically zeroes out the weakest predictors, "
               "confirming only a small set of variables really drives spending.".format(best_r))
 
@@ -2320,7 +2278,7 @@ elif page == "\U0001f4ca  Research & Analytics":
 
         tab_summary([
             "Dog count and metro location are the strongest predictors of how much someone spends.",
-            "Ridge regression outperforms plain linear regression due to correlated features.",
-            "Lasso confirms the findings by zeroing out weak predictors \u2014 the same features survive in both models.",
+            "Linear, Ridge and Lasso perform similarly on held-out data, indicating stable signals across model families.",
+            "Lasso confirms the findings by shrinking weak predictors \u2014 the same core features survive across models.",
             "Regression R\u00b2 values are moderate \u2014 spending is driven by many factors, not just the ones surveyed.",
         ])
