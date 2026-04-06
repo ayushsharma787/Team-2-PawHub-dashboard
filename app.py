@@ -147,8 +147,10 @@ stApp::before, .stApp::after {
 .main .block-container { position: relative; z-index: 1; }
 
 @keyframes floatGlow {
-  0%,100% { transform: translateY(0) translateX(0) scale(1); }
-  50%     { transform: translateY(-18px) translateX(14px) scale(1.08); }
+  0%,100% { transform: translateY(0)    translateX(0)    scale(1);    opacity: .12; }
+  25%     { transform: translateY(-28px) translateX(20px) scale(1.12); opacity: .16; }
+  50%     { transform: translateY(-18px) translateX(-10px) scale(1.06); opacity: .14; }
+  75%     { transform: translateY(-36px) translateX(16px) scale(1.15); opacity: .18; }
 }
 /* ── Force all Streamlit text to cream on dark ── */
 .stMarkdown p, .stMarkdown li, .stMarkdown span,
@@ -282,153 +284,219 @@ section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] input[type="rad
   border: 1px solid rgba(212,168,83,.2);
 }
 @keyframes liveDot { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ── Floaty card lift — bigger travel, softer shadow bloom ── */
 @keyframes floatCard {
-  0%,100% { transform: translateY(0); box-shadow: 0 4px 20px rgba(0,0,0,.3); }
-  50% { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,.4); }
+  0%,100% { transform: translateY(0px) rotate(0deg);   box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+  25%     { transform: translateY(-7px) rotate(.3deg); box-shadow: 0 14px 36px rgba(0,0,0,.45); }
+  75%     { transform: translateY(-3px) rotate(-.2deg);box-shadow: 0 9px 28px rgba(0,0,0,.38); }
 }
 
-/* ── Icon & element animations ── */
+/* ── Springy bounce — overshoots then settles ── */
 @keyframes iconBounce {
-  0%,100% { transform: translateY(0); }
-  30% { transform: translateY(-6px); }
-  50% { transform: translateY(0); }
-  70% { transform: translateY(-3px); }
+  0%          { transform: translateY(0) scale(1); }
+  20%         { transform: translateY(-10px) scale(.95); }
+  40%         { transform: translateY(0px) scale(1.08); }
+  55%         { transform: translateY(-5px) scale(.98); }
+  70%         { transform: translateY(0px) scale(1.04); }
+  80%         { transform: translateY(-2px) scale(1); }
+  100%        { transform: translateY(0) scale(1); }
 }
+
+/* ── Breathing pulse with a hint of lift ── */
 @keyframes iconPulse {
-  0%,100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.15); opacity: 0.85; }
+  0%,100% { transform: scale(1)    translateY(0);    opacity: 1; }
+  40%     { transform: scale(1.2)  translateY(-3px); opacity: 0.9; }
+  70%     { transform: scale(1.06) translateY(-1px); opacity: 0.95; }
 }
+
+/* ── Wiggly wag — bigger arcs ── */
 @keyframes iconWiggle {
-  0%,100% { transform: rotate(0deg); }
-  25% { transform: rotate(-8deg); }
-  75% { transform: rotate(8deg); }
+  0%,100% { transform: rotate(0deg) scale(1); }
+  15%     { transform: rotate(-12deg) scale(1.05); }
+  35%     { transform: rotate(10deg) scale(1.05); }
+  55%     { transform: rotate(-7deg) scale(1.02); }
+  75%     { transform: rotate(5deg) scale(1.02); }
 }
+
 @keyframes shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
 }
+
+/* ── Glow pulse — more dramatic golden bloom ── */
 @keyframes glowPulse {
-  0%,100% { box-shadow: 0 2px 12px rgba(0,0,0,.3); border-color: rgba(212,168,83,0.15); }
-  50% { box-shadow: 0 4px 20px rgba(212,168,83,.15); border-color: rgba(212,168,83,0.3); }
+  0%,100% { box-shadow: 0 2px 12px rgba(0,0,0,.3);       border-color: rgba(212,168,83,0.15); }
+  50%     { box-shadow: 0 6px 28px rgba(212,168,83,.25);  border-color: rgba(212,168,83,0.45); }
 }
+
+/* ── Entrance — slides up with spring overshoot ── */
 @keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
+  0%   { opacity: 0; transform: translateY(28px) scale(.97); }
+  70%  { opacity: 1; transform: translateY(-4px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
 }
+
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 @keyframes borderGlow {
-  0%,100% { border-color: rgba(212,168,83,0.15); }
-  50% { border-color: rgba(212,168,83,0.4); }
+  0%,100% { border-color: rgba(212,168,83,0.15); box-shadow: none; }
+  50%     { border-color: rgba(212,168,83,0.5);  box-shadow: 0 0 18px rgba(212,168,83,.1); }
 }
 @keyframes spinSlow {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Gentle continuous drift for metric numbers ── */
+@keyframes numberFloat {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-3px); }
+}
+
+/* ── Rubber-band stretch on hover (used via class) ── */
+@keyframes rubberBand {
+  0%   { transform: scale(1,1); }
+  20%  { transform: scale(1.15,.75); }
+  40%  { transform: scale(.85,1.1); }
+  60%  { transform: scale(1.05,.95); }
+  80%  { transform: scale(.98,1.02); }
+  100% { transform: scale(1,1); }
+}
+
+/* ── Wobbly entrance for sidebar active item ── */
+@keyframes sidebarPop {
+  0%   { transform: translateX(-6px) scale(.96); opacity: 0; }
+  60%  { transform: translateX(3px)  scale(1.02); opacity: 1; }
+  100% { transform: translateX(0)    scale(1); opacity: 1; }
 }
 
 /* ── Animated sidebar nav icons ── */
 section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label p {
-  transition: all .3s cubic-bezier(.22,1,.36,1) !important;
+  transition: all .35s cubic-bezier(.34,1.56,.64,1) !important;
 }
 section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover p {
-  letter-spacing: 0.3px !important;
+  letter-spacing: 0.5px !important;
+}
+section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {
+  transform: translateX(6px) scale(1.02) !important;
+}
+section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:has(input:checked) {
+  animation: sidebarPop .45s cubic-bezier(.34,1.56,.64,1) both;
 }
 
 /* ── Animated info/warn boxes ── */
 .ibox {
-  animation: fadeSlideUp 0.5s ease-out both;
-  transition: transform .3s ease, box-shadow .3s ease;
+  animation: fadeSlideUp 0.55s cubic-bezier(.34,1.56,.64,1) both;
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease;
 }
 .ibox:hover {
-  transform: translateX(4px);
-  box-shadow: 0 4px 16px rgba(212,168,83,.12);
+  transform: translateX(7px) scale(1.01);
+  box-shadow: 0 6px 22px rgba(212,168,83,.18);
 }
 .warnbox {
-  animation: fadeSlideUp 0.5s ease-out both;
-  transition: transform .3s ease, box-shadow .3s ease;
+  animation: fadeSlideUp 0.55s cubic-bezier(.34,1.56,.64,1) both;
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease;
 }
 .warnbox:hover {
-  transform: translateX(4px);
-  box-shadow: 0 4px 16px rgba(239,83,80,.12);
+  transform: translateX(7px) scale(1.01);
+  box-shadow: 0 6px 22px rgba(239,83,80,.18);
 }
 
 /* ── Animated section headers ── */
 .shead {
-  animation: fadeSlideUp 0.4s ease-out both;
+  animation: fadeSlideUp 0.45s cubic-bezier(.34,1.56,.64,1) both;
 }
 
-/* ── Animated cards ── */
+/* ── Animated cards — float + entrance ── */
 .icard {
-  animation: fadeSlideUp 0.5s ease-out both, glowPulse 4s ease-in-out infinite;
-  transition: transform .35s ease, box-shadow .35s ease;
+  animation: fadeSlideUp 0.55s cubic-bezier(.34,1.56,.64,1) both, floatCard 5s ease-in-out infinite;
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1), box-shadow .4s ease;
 }
 .icard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(212,168,83,.18);
+  transform: translateY(-8px) scale(1.015) !important;
+  box-shadow: 0 16px 40px rgba(212,168,83,.22) !important;
+  animation-play-state: paused;
 }
+
+/* ── Staggered float delays so cards don't all move in sync ── */
+.icard:nth-child(2) { animation-delay: 0s, .6s; }
+.icard:nth-child(3) { animation-delay: 0s, 1.2s; }
+.icard:nth-child(4) { animation-delay: 0s, 1.8s; }
+.icard:nth-child(5) { animation-delay: 0s, 2.4s; }
 
 /* ── Live bar animated gradient border ── */
 .lbar {
-  animation: borderGlow 3s ease-in-out infinite;
-  transition: transform .3s ease;
+  animation: borderGlow 2.5s ease-in-out infinite;
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
 }
 .lbar:hover {
-  transform: scale(1.005);
+  transform: scale(1.012) translateY(-2px);
+  box-shadow: 0 8px 28px rgba(212,168,83,.14);
 }
 
 /* ── Animated metric cards ── */
 [data-testid="stMetric"] {
-  animation: fadeSlideUp 0.5s ease-out both;
-  transition: transform .3s ease, box-shadow .3s ease !important;
+  animation: fadeSlideUp 0.55s cubic-bezier(.34,1.56,.64,1) both;
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1), box-shadow .4s ease !important;
 }
 [data-testid="stMetric"]:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 6px 20px rgba(212,168,83,.15) !important;
+  transform: translateY(-7px) scale(1.03) !important;
+  box-shadow: 0 12px 32px rgba(212,168,83,.22) !important;
+}
+[data-testid="stMetricValue"] {
+  animation: numberFloat 3s ease-in-out infinite;
 }
 
-/* ── Animated tabs ── */
+/* ── Animated tabs — spring lift ── */
 .stTabs [data-baseweb="tab"] {
-  transition: all .3s cubic-bezier(.22,1,.36,1) !important;
+  transition: all .35s cubic-bezier(.34,1.56,.64,1) !important;
 }
 .stTabs [data-baseweb="tab"]:hover {
-  transform: translateY(-2px) !important;
+  transform: translateY(-4px) scale(1.04) !important;
 }
 .stTabs [aria-selected="true"] {
   animation: glowPulse 3s ease-in-out infinite;
+  transform: translateY(-1px) !important;
 }
 
-/* ── Button hover effects ── */
+/* ── Button hover effects — spring bounce ── */
 .stButton > button {
-  transition: all .3s ease !important;
+  transition: all .35s cubic-bezier(.34,1.56,.64,1) !important;
 }
 .stButton > button:hover {
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 6px 20px rgba(111,78,55,.4) !important;
+  transform: translateY(-4px) scale(1.05) !important;
+  box-shadow: 0 10px 28px rgba(111,78,55,.45) !important;
+}
+.stButton > button:active {
+  transform: translateY(0) scale(.97) !important;
+  transition-duration: .1s !important;
 }
 .stDownloadButton > button {
-  transition: all .3s ease !important;
+  transition: all .35s cubic-bezier(.34,1.56,.64,1) !important;
 }
 .stDownloadButton > button:hover {
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 6px 20px rgba(61,107,61,.4) !important;
+  transform: translateY(-4px) scale(1.05) !important;
+  box-shadow: 0 10px 28px rgba(61,107,61,.45) !important;
 }
 
 /* ── Expander animation ── */
 [data-testid="stExpander"] {
-  animation: fadeSlideUp 0.5s ease-out both;
-  transition: border-color .3s ease !important;
+  animation: fadeSlideUp 0.55s cubic-bezier(.34,1.56,.64,1) both;
+  transition: border-color .3s ease, transform .35s cubic-bezier(.34,1.56,.64,1) !important;
 }
 [data-testid="stExpander"]:hover {
-  border-color: rgba(212,168,83,0.3) !important;
+  border-color: rgba(212,168,83,0.35) !important;
+  transform: translateY(-2px);
 }
 
 /* ── Animated icon spans ── */
-.anim-bounce { display:inline-block; animation: iconBounce 2s ease-in-out infinite; }
+.anim-bounce { display:inline-block; animation: iconBounce 2.2s cubic-bezier(.34,1.56,.64,1) infinite; }
 .anim-pulse  { display:inline-block; animation: iconPulse 2.5s ease-in-out infinite; }
-.anim-wiggle { display:inline-block; animation: iconWiggle 2s ease-in-out infinite; }
+.anim-wiggle { display:inline-block; animation: iconWiggle 2.2s ease-in-out infinite; }
 .anim-spin   { display:inline-block; animation: spinSlow 8s linear infinite; }
 .anim-float  { display:inline-block; animation: floatCard 4s ease-in-out infinite; }
 
@@ -439,7 +507,7 @@ section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover p {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 4s linear infinite;
+  animation: shimmer 3.5s linear infinite;
 }
 
 /* ── Animated gradient dividers ── */
@@ -447,8 +515,16 @@ section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover p {
   height: 2px; border: none; border-radius: 2px;
   background: linear-gradient(90deg, transparent, #D4A853, #6F4E37, #D4A853, transparent);
   background-size: 200% 100%;
-  animation: gradientShift 3s ease infinite;
+  animation: gradientShift 2.5s ease infinite;
   margin: 16px 0;
+}
+
+/* ── Dataframe rows subtle hover lift ── */
+[data-testid="stDataFrame"] tr {
+  transition: background .2s ease, transform .2s cubic-bezier(.34,1.56,.64,1);
+}
+[data-testid="stDataFrame"] tr:hover {
+  transform: scale(1.004);
 }
 </style>
 """, unsafe_allow_html=True)
