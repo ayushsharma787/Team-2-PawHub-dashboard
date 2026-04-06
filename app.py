@@ -1995,7 +1995,7 @@ elif page == "\U0001f4ca  Research & Analytics":
         st.markdown(
             '<div class="ibox" style="margin-bottom:30px"><span class="anim-pulse">\U0001f4a1</span> {}</div>'.format(t), unsafe_allow_html=True)
 
-    t1, t2, t3, t4 = st.tabs(["\U0001f3af Classification","\U0001f535 Clustering",
+    t1, t2, t3 = st.tabs(["\U0001f3af Classification","\U0001f535 Clustering",
                             "\U0001f4c8 Regression"])
 
     # ── Classification ────────────────────────────────────────────────────────
@@ -2201,7 +2201,7 @@ elif page == "\U0001f4ca  Research & Analytics":
 
    
     # ── Regression ────────────────────────────────────────────────────────────
-    with t4:
+    with t3:
         dhead("Regression \u2014 What Predicts How Much a Dog Owner Spends?")
         st.markdown("<p style='color:{}'>Target: Q7 monthly spend (INR). "
                     "Linear, Ridge (L2) and Lasso (L1) regression compared on R\u00b2, RMSE and MAE.</p>".format(TEXT_DIM),
