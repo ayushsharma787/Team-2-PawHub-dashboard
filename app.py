@@ -2213,7 +2213,7 @@ elif page == "\U0001f4ca  Research & Analytics":
         dhead("Model Comparison")
         _dark_table(reg_res, h=170)
         best_r = reg_res.sort_values("R\u00b2",ascending=False).iloc[0]["Model"]
-        dibox("Best model: {}. Ridge regularisation handles correlated one-hot features better "
+        dibox("Best model: {}. Ridge regularisation handles correlated one-hot features better ")
         dibox("Best model: {}. Metrics are now computed after removing target leakage (monthly spend and spend-per-dog) from predictors, so scores are realistic. Ridge regularisation handles correlated one-hot features better "
               "than plain linear regression. Lasso automatically zeroes out the weakest predictors, "
               "confirming only a small set of variables really drives spending.".format(best_r))
